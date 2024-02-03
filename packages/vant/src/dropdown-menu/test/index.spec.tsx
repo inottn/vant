@@ -367,3 +367,35 @@ test('auto-locate prop', async () => {
 
   vi.doUnmock('../../utils/dom');
 });
+
+test('title-class prop', async () => {
+  const titleClass1 = ref({ custom: true });
+  const titleClass2 = ref();
+  const wrapper = mount({
+    setup() {
+      return () => (
+        <DropdownMenu>
+          <DropdownItem titleClass={{ custom: true }} />
+          <DropdownItem titleClass={titleClass1.value} />
+          <DropdownItem titleClass={titleClass2.value} />
+        </DropdownMenu>
+      );
+    },
+  });
+
+  await later();
+
+  const titles = wrapper.findAll('.van-dropdown-menu__title');
+  // using object literal should work
+  expect(titles[0].classes()).toContain('custom');
+  expect(titles[1].classes()).toContain('custom');
+  expect(titles[2].classes()).not.toContain('custom');
+
+  titleClass1.value.custom = false;
+  await later();
+  expect(titles[1].classes()).not.toContain('custom');
+
+  titleClass2.value = { custom: true };
+  await later();
+  expect(titles[2].classes()).toContain('custom');
+});

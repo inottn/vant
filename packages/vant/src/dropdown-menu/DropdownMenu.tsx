@@ -123,7 +123,7 @@ export default defineComponent({
 
     const renderTitle = (item: ComponentInstance, index: number) => {
       const { showPopup } = item.state;
-      const { disabled, titleClass } = item;
+      const { disabled, parsedTitleClass } = item;
 
       return (
         <div
@@ -146,7 +146,7 @@ export default defineComponent({
                 down: showPopup === (props.direction === 'down'),
                 active: showPopup,
               }),
-              titleClass,
+              parsedTitleClass.value,
             ]}
             style={{ color: showPopup ? props.activeColor : '' }}
           >

@@ -1,4 +1,5 @@
 import {
+  computed,
   reactive,
   Teleport,
   defineComponent,
@@ -8,6 +9,8 @@ import {
   type CSSProperties,
   type ExtractPropTypes,
 } from 'vue';
+// eslint-disable-next-line vue/prefer-import-from-vue
+import { normalizeClass } from '@vue/shared';
 
 // Utils
 import {
@@ -220,7 +223,12 @@ export default defineComponent({
       );
     };
 
-    useExpose({ state, toggle, renderTitle });
+    const parsedTitleClass = computed(() => {
+      const { titleClass } = props;
+      return titleClass ? normalizeClass(titleClass) : '';
+    });
+
+    useExpose({ parsedTitleClass, state, toggle, renderTitle });
 
     return () => {
       if (props.teleport) {
