@@ -50,10 +50,7 @@ export const floatingBubbleProps = {
   icon: String,
   axis: makeStringProp<FloatingBubbleAxis>('y'),
   magnetic: String as PropType<FloatingBubbleMagnetic>,
-  offset: {
-    type: Object as unknown as PropType<FloatingBubbleOffset>,
-    default: () => ({ x: -1, y: -1 }),
-  },
+  offset: Object as unknown as PropType<FloatingBubbleOffset>,
   teleport: {
     type: [String, Object] as PropType<TeleportProps['to']>,
     default: 'body',
@@ -120,8 +117,8 @@ export default defineComponent({
       const { width, height } = useRect(rootRef.value!);
       const { offset } = props;
       state.value = {
-        x: offset.x > -1 ? offset.x : windowWidth.value - width - gapX.value,
-        y: offset.y > -1 ? offset.y : windowHeight.value - height - gapY.value,
+        x: offset ? offset.x : windowWidth.value - width - gapX.value,
+        y: offset ? offset.y : windowHeight.value - height - gapY.value,
         width,
         height,
       };
