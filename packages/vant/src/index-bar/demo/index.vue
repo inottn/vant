@@ -11,10 +11,12 @@ const t = useTranslate({
   'zh-CN': {
     text: '文本',
     customIndexList: '自定义索引列表',
+    customIndexCharacter: '自定义索引栏字符',
   },
   'en-US': {
     text: 'Text',
     customIndexList: 'Custom Index List',
+    customIndexCharacter: 'Custom Index Bar Character',
   },
 });
 
@@ -29,7 +31,7 @@ for (let i = 0; i < 26; i++) {
 </script>
 
 <template>
-  <van-tabs v-model:active="activeTab">
+  <van-tabs v-model:active="activeTab" :swipe-threshold="2">
     <van-tab :title="t('basicUsage')">
       <van-index-bar>
         <div v-for="index in indexList" :key="index">
@@ -51,6 +53,20 @@ for (let i = 0; i < 26; i++) {
           <van-cell :title="t('text')" />
           <van-cell :title="t('text')" />
         </div>
+      </van-index-bar>
+    </van-tab>
+
+    <van-tab :title="t('customIndexCharacter')">
+      <van-index-bar>
+        <div v-for="index in indexList" :key="index">
+          <van-index-anchor :index="index" />
+          <van-cell :title="t('text')" />
+          <van-cell :title="t('text')" />
+          <van-cell :title="t('text')" />
+        </div>
+        <template #index="{ index, active }">
+          <div>{{ active ? '★' : '☆' }} {{ index }}</div>
+        </template>
       </van-index-bar>
     </van-tab>
   </van-tabs>

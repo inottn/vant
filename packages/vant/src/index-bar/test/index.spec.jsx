@@ -22,6 +22,51 @@ test('should allow to custom anchor content', () => {
   expect(wrapper.find('.van-index-anchor').html()).toMatchSnapshot();
 });
 
+test('should allow to custom index bar character via index slot', () => {
+  const wrapper = mount({
+    render: () => (
+      <IndexBar
+        v-slots={{
+          index: ({ index }) => (
+            <div class="custom-index">{`Custom ${index}`}</div>
+          ),
+        }}
+      >
+        <IndexAnchor index="A" />
+        <IndexAnchor index="B" />
+      </IndexBar>
+    ),
+  });
+
+  const indexes = wrapper.findAll('.van-index-bar__index');
+  expect(indexes[0].find('.custom-index').text()).toBe('Custom A');
+  expect(indexes[1].find('.custom-index').text()).toBe('Custom B');
+});
+
+test('should trigger click event correctly when using index slot', () => {
+  const onSelect = vi.fn();
+  const wrapper = mount({
+    render: () => (
+      <IndexBar
+        v-slots={{
+          index: ({ index }) => <div class="custom-index">{index}</div>,
+        }}
+        onSelect={onSelect}
+      >
+        <IndexAnchor index="A" />
+        <IndexAnchor index="B" />
+      </IndexBar>
+    ),
+  });
+
+  const fn = mockScrollIntoView();
+  const customIndex = wrapper.find('.custom-index');
+  customIndex.trigger('click');
+
+  expect(fn).toHaveBeenCalledTimes(1);
+  expect(onSelect).toHaveBeenCalledWith('A');
+});
+
 test('should scroll to anchor and emit select event after clicking the index-bar', () => {
   const onSelect = vi.fn();
   const wrapper = mount({

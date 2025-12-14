@@ -69,6 +69,30 @@ export default {
 };
 ```
 
+### 自定义索引栏字符
+
+可以通过 `index` 插槽自定义索引栏的字符内容。
+
+```html
+<van-index-bar>
+  <van-index-anchor index="A" />
+  <van-cell title="文本" />
+  <van-cell title="文本" />
+  <van-cell title="文本" />
+
+  <van-index-anchor index="B" />
+  <van-cell title="文本" />
+  <van-cell title="文本" />
+  <van-cell title="文本" />
+
+  ...
+
+  <template #index="{ index, active }">
+    <div>{{ active ? '★' : '☆' }} {{ index }}</div>
+  </template>
+</van-index-bar>
+```
+
 ## API
 
 ### IndexBar Props
@@ -94,6 +118,18 @@ export default {
 | ------ | ---------------------------- | ------------------------- |
 | select | 点击索引栏的字符时触发       | _index: number \| string_ |
 | change | 当前高亮的索引字符变化时触发 | _index: number \| string_ |
+
+### IndexBar Slots
+
+| 名称 | 说明 | 参数 |
+| --- | --- | --- |
+| index `4.9.23` | 自定义索引栏字符内容 | _{ index: number \| string, active: boolean }_ |
+
+### IndexAnchor Slots
+
+| 名称    | 说明                            |
+| ------- | ------------------------------- |
+| default | 锚点位置显示内容,默认为索引字符 |
 
 ### IndexBar 方法
 
@@ -121,12 +157,6 @@ const indexBarRef = ref<IndexBarInstance>();
 
 indexBarRef.value?.scrollTo('B');
 ```
-
-### IndexAnchor Slots
-
-| 名称    | 说明                             |
-| ------- | -------------------------------- |
-| default | 锚点位置显示内容，默认为索引字符 |
 
 ## 主题定制
 

@@ -65,6 +65,30 @@ export default {
 };
 ```
 
+### Custom Index Bar Character
+
+You can customize the index bar character content through the `index` slot.
+
+```html
+<van-index-bar>
+  <van-index-anchor index="A" />
+  <van-cell title="Text" />
+  <van-cell title="Text" />
+  <van-cell title="Text" />
+
+  <van-index-anchor index="B" />
+  <van-cell title="Text" />
+  <van-cell title="Text" />
+  <van-cell title="Text" />
+
+  ...
+
+  <template #index="{ index, active }">
+    <div>{{ active ? '★' : '☆' }} {{ index }}</div>
+  </template>
+</van-index-bar>
+```
+
 ## API
 
 ### IndexBar Props
@@ -90,6 +114,18 @@ export default {
 | ------ | --------------------------------- | ------------------------- |
 | select | Emitted when an index is selected | _index: number \| string_ |
 | change | Emitted when active index changed | _index: number \| string_ |
+
+### IndexBar Slots
+
+| Name | Description | SlotProps |
+| --- | --- | --- |
+| index `4.9.23` | Custom index bar character content | _{ index: number \| string, active: boolean }_ |
+
+### IndexAnchor Slots
+
+| Name    | Description                           |
+| ------- | ------------------------------------- |
+| default | Anchor content, show index by default |
 
 ### IndexBar Methods
 
@@ -117,12 +153,6 @@ const indexBarRef = ref<IndexBarInstance>();
 
 indexBarRef.value?.scrollTo('B');
 ```
-
-### IndexAnchor Slots
-
-| Name    | Description                           |
-| ------- | ------------------------------------- |
-| default | Anchor content, show index by default |
 
 ## Theming
 

@@ -211,7 +211,7 @@ export default defineComponent({
             style={active ? highlightStyle.value : undefined}
             data-index={index}
           >
-            {index}
+            {slots.index ? slots.index({ index, active }) : index}
           </span>
         );
       });
@@ -244,15 +244,22 @@ export default defineComponent({
       }
     };
 
-    const scrollToElement = (element: HTMLElement) => {
-      const { index } = element.dataset;
-      if (index) {
-        scrollTo(index);
+    const getIndexElement = (element: HTMLElement) => {
+      let target: HTMLElement | null = element;
+      while (target && target.parentElement !== sidebar.value) {
+        target = target.parentElement;
       }
+      return target;
     };
 
     const onClickSidebar = (event: MouseEvent) => {
-      scrollToElement(event.target as HTMLElement);
+      const target = getIndexElement(event.target as HTMLElement);
+      if (target) {
+        const { index } = target.dataset;
+        if (index) {
+          scrollTo(index);
+        }
+      }
     };
 
     let touchActiveIndex: string;
@@ -267,13 +274,15 @@ export default defineComponent({
         const target = document.elementFromPoint(
           clientX,
           clientY,
-        ) as HTMLElement;
+        ) as HTMLElement | null;
         if (target) {
-          const { index } = target.dataset;
-
-          if (index && touchActiveIndex !== index) {
-            touchActiveIndex = index;
-            scrollToElement(target);
+          const indexElement = getIndexElement(target);
+          if (indexElement) {
+            const { index } = indexElement.dataset;
+            if (index && touchActiveIndex !== index) {
+              touchActiveIndex = index;
+              scrollTo(index);
+            }
           }
         }
       }
