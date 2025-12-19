@@ -235,6 +235,27 @@ test('should format v-model with step correctly', async () => {
   expect(wrapper.emitted('update:modelValue')![0]).toEqual([31]);
 });
 
+test('should handle decimal precision correctly', async () => {
+  const restoreMock = mockRect();
+
+  const wrapper = mount(Slider, {
+    props: {
+      min: 0.01,
+      max: 1000000,
+      step: 0.1,
+      modelValue: 0,
+    },
+  });
+
+  trigger(wrapper, 'click', 22.51873, 0);
+  expect(wrapper.emitted('update:modelValue')!.pop()).toEqual([225187.31]);
+
+  trigger(wrapper, 'click', 0, 0);
+  expect(wrapper.emitted('update:modelValue')!.pop()).toEqual([0.01]);
+
+  restoreMock();
+});
+
 test('should render button slot correctly', async () => {
   const buttonSlot = vi.fn();
   const wrapper = mount(Slider, {

@@ -25,6 +25,10 @@ import {
 import { useRect, useCustomFieldValue, useEventListener } from '@vant/use';
 import { useTouch } from '../composables/use-touch';
 
+const getPrecise = (value: number) => {
+  return String(value).split('.')[1]?.length || 0;
+};
+
 const [name, bem] = createNamespace('slider');
 
 type NumberRange = [number, number];
@@ -70,6 +74,13 @@ export default defineComponent({
     const touch = useTouch();
 
     const scope = computed(() => Number(props.max) - Number(props.min));
+    const precise = computed(() =>
+      Math.max(
+        getPrecise(+props.step),
+        getPrecise(+props.min),
+        getPrecise(+props.max),
+      ),
+    );
 
     const wrapperStyle = computed(() => {
       const crossAxis = props.vertical ? 'width' : 'height';
@@ -130,7 +141,7 @@ export default defineComponent({
 
       value = clamp(value, min, max);
       const diff = Math.round((value - min) / step) * step;
-      return addNumber(min, diff);
+      return +addNumber(min, diff).toFixed(precise.value);
     };
 
     const updateStartValue = () => {
