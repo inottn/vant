@@ -460,3 +460,25 @@ test('should reset scale after calling the resetScale method', async () => {
   await later();
   expect(image.style.transform).toBeFalsy();
 });
+
+test('should close when swiping down', async () => {
+  const restore = mockGetBoundingClientRect({ width: 100, height: 100 });
+  const wrapper = mount(ImagePreview, {
+    props: {
+      images,
+      show: true,
+      closeOnSwipeDown: true,
+      'onUpdate:show': (show) => {
+        wrapper.setProps({ show });
+      },
+    },
+  });
+
+  await later();
+  const swipe = wrapper.find('.van-swipe-item');
+
+  await triggerDrag(swipe, 0, 100);
+  expect(wrapper.emitted('close')).toBeTruthy();
+
+  restore();
+});

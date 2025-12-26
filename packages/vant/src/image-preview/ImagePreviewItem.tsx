@@ -57,6 +57,7 @@ const imagePreviewItemProps = {
   closeOnClickImage: Boolean,
   closeOnClickOverlay: Boolean,
   vertical: Boolean,
+  closeOnSwipeDown: Boolean,
 };
 
 export type ImagePreviewItemProps = ExtractPropTypes<
@@ -66,7 +67,7 @@ export type ImagePreviewItemProps = ExtractPropTypes<
 export default defineComponent({
   props: imagePreviewItemProps,
 
-  emits: ['scale', 'close', 'longPress'],
+  emits: ['scale', 'close', 'longPress', 'drag'],
 
   setup(props, { emit, slots }) {
     const state = reactive({
@@ -77,6 +78,7 @@ export default defineComponent({
       zooming: false,
       initializing: false,
       imageRatio: 0,
+      swipingDown: false,
     });
 
     const touch = useTouch();
@@ -88,12 +90,21 @@ export default defineComponent({
     let initialMoveY = 0;
 
     const imageStyle = computed(() => {
-      const { scale, moveX, moveY, moving, zooming, initializing } = state;
+      const {
+        scale,
+        moveX,
+        moveY,
+        moving,
+        zooming,
+        initializing,
+        swipingDown,
+      } = state;
       const style: CSSProperties = {
-        transitionDuration: zooming || moving || initializing ? '0s' : '.3s',
+        transitionDuration:
+          zooming || moving || initializing || swipingDown ? '0s' : '.3s',
       };
 
-      if (scale !== 1 || isLongImage.value) {
+      if (scale !== 1 || isLongImage.value || swipingDown) {
         // use matrix to solve the problem of elements not rendering due to safari optimization
         style.transform = `matrix(${scale}, 0, 0, ${scale}, ${moveX}, ${moveY})`;
       }
@@ -206,6 +217,7 @@ export default defineComponent({
       state.moving =
         fingerNum === 1 && (state.scale !== 1 || isLongImage.value);
       state.zooming = fingerNum === 2 && !offsetX.value;
+      state.swipingDown = false;
 
       if (state.zooming) {
         startScale = state.scale;
@@ -249,6 +261,31 @@ export default defineComponent({
           const scale = (startScale * distance) / startDistance;
           lastCenter = getCenter(touches);
           setScale(scale, lastCenter);
+        }
+      }
+
+      if (state.swipingDown) {
+        const { deltaX, deltaY } = touch;
+        preventDefault(event, true);
+        state.moveX = deltaX.value;
+        state.moveY = deltaY.value;
+        state.scale = clamp(1 - deltaY.value / props.rootHeight, 0.2, 1);
+        emit('drag', {
+          scale: state.scale,
+          moveX: state.moveX,
+          moveY: state.moveY,
+        });
+      } else if (
+        !state.moving &&
+        !state.zooming &&
+        state.scale === 1 &&
+        !isLongImage.value &&
+        props.closeOnSwipeDown
+      ) {
+        const { deltaY } = touch;
+        if (touch.isVertical() && deltaY.value > 10) {
+          state.swipingDown = true;
+          preventDefault(event, true);
         }
       }
     };
@@ -306,6 +343,20 @@ export default defineComponent({
 
     const onTouchEnd = (event: TouchEvent) => {
       let stopPropagation = false;
+
+      if (state.swipingDown) {
+        if (state.moveY > props.rootHeight * 0.15) {
+          emit('close');
+          state.swipingDown = false;
+        } else {
+          state.swipingDown = false;
+          state.moveX = 0;
+          state.moveY = 0;
+          state.scale = 1;
+          emit('drag', { scale: 1, moveX: 0, moveY: 0 });
+        }
+        stopPropagation = true;
+      }
 
       /* istanbul ignore else */
       if (state.moving || state.zooming) {

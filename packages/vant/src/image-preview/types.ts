@@ -32,6 +32,7 @@ export type ImagePreviewOptions = {
   closeIconPosition?: PopupCloseIconPosition;
   closeOnClickImage?: boolean;
   closeOnClickOverlay?: boolean;
+  closeOnSwipeDown?: boolean;
   onClose?(): void;
   onScale?(args: { scale: number; index: number }): void;
   onChange?(index: number): void;

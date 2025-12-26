@@ -14,6 +14,7 @@ import {
 // Utils
 import {
   pick,
+  clamp,
   truthProp,
   unknownProp,
   Interceptor,
@@ -49,7 +50,6 @@ const popupProps = [
   'show',
   'teleport',
   'transition',
-  'overlayStyle',
   'closeOnPopstate',
 ] as const;
 
@@ -76,6 +76,7 @@ export const imagePreviewProps = {
   closeOnPopstate: truthProp,
   closeOnClickImage: truthProp,
   closeOnClickOverlay: truthProp,
+  closeOnSwipeDown: truthProp,
   closeIconPosition: makeStringProp<PopupCloseIconPosition>('top-right'),
   teleport: [String, Object] as PropType<TeleportProps['to']>,
 };
@@ -92,6 +93,7 @@ export default defineComponent({
   setup(props, { emit, slots }) {
     const swipeRef = ref<SwipeInstance>();
     const activedPreviewItemRef = ref<ImagePreviewItemInstance>();
+    const currentOverlayStyle = ref<CSSProperties>();
 
     const state = reactive({
       active: 0,
@@ -111,6 +113,13 @@ export default defineComponent({
 
     const emitScale = (args: ImagePreviewScaleEventParams) =>
       emit('scale', args);
+
+    const onDrag = ({ moveY }: { moveY: number }) => {
+      if (state.rootHeight > 0) {
+        const opacity = clamp(1 - moveY / state.rootHeight, 0, 1);
+        currentOverlayStyle.value = { opacity };
+      }
+    };
 
     const updateShow = (show: boolean) => emit('update:show', show);
 
@@ -190,10 +199,12 @@ export default defineComponent({
             doubleScale={props.doubleScale}
             closeOnClickImage={props.closeOnClickImage}
             closeOnClickOverlay={props.closeOnClickOverlay}
+            closeOnSwipeDown={props.closeOnSwipeDown}
             vertical={props.vertical}
-            onScale={emitScale}
             onClose={emitClose}
+            onDrag={onDrag}
             onLongPress={() => emit('longPress', { index })}
+            onScale={emitScale}
           />
         ))}
       </Swipe>
@@ -215,7 +226,10 @@ export default defineComponent({
       }
     };
 
-    const onClosed = () => emit('closed');
+    const onClosed = () => {
+      emit('closed');
+      currentOverlayStyle.value = {};
+    };
 
     const swipeTo = (index: number, options?: SwipeToOptions) =>
       swipeRef.value?.swipeTo(index, options);
@@ -254,6 +268,20 @@ export default defineComponent({
         }
       },
     );
+
+    // <Popup
+    //     class={[bem(), props.className]}
+    //     overlayClass={[bem('overlay'), props.overlayClass]}
+    //     overlayStyle={{ ...props.overlayStyle, ...currentOverlayStyle.value }}
+    //     onClosed={onClosed}
+    //     onUpdate:show={updateShow}
+    //     {...pick(props, popupProps)}
+    //   >
+    //     {renderClose()}
+    //     {renderImages()}
+    //     {renderIndex()}
+    //     {renderCover()}
+    //   </Popup>
 
     return () => (
       <Popup
